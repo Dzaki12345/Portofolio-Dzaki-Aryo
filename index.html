@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dzaki Aryo Al-Ikram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@200;300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c0:#050810;--c1:#080d1a;--c2:#0d1425;
+  --neon:#00f5d4;--neon2:#7b2fff;--neon3:#ff2d78;
+  --neon-dim:rgba(0,245,212,0.07);
+  --white:#eef2ff;--muted:#5a6a8a;--border:rgba(0,245,212,0.15);
+  --font-head:'Bebas Neue',sans-serif;
+  --font-body:'Outfit',sans-serif;
+  --font-mono:'Space Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--c0);color:var(--white);font-family:var(--font-body);overflow-x:hidden;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;width:10px;height:10px;border-radius:50%;background:var(--neon);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .15s,height .15s}
+#cur2{position:fixed;width:36px;height:36px;border-radius:50%;border:1px solid rgba(0,245,212,.4);pointer-events:none;z-index:9998;transform:translate(-50%,-50%)}
+
+/* CANVAS */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.6}
+
+/* GRID */
+.grid-overlay{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(rgba(0,245,212,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,.02) 1px,transparent 1px);background-size:80px 80px}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:1.4rem 5rem;display:flex;justify-content:space-between;align-items:center}
+nav::after{content:'';position:absolute;bottom:0;left:5rem;right:5rem;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);opacity:.25}
+.nav-logo{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.25em;color:var(--neon);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;gap:.6rem}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--neon);box-shadow:0 0 8px var(--neon);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s;position:relative;cursor:none}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--neon);transition:width .3s}
+.nav-links a:hover,.nav-links a.active{color:var(--neon)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:10rem 5rem 6rem;position:relative;z-index:10}
+.hero-chip{display:inline-flex;align-items:center;gap:.6rem;padding:.4rem 1rem;border:1px solid var(--border);background:rgba(0,245,212,.05);font-family:var(--font-mono);font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--neon);margin-bottom:2.5rem;width:fit-content}
+.hero-name{font-family:var(--font-head);font-size:clamp(4.5rem,12vw,11rem);line-height:.9;letter-spacing:.02em;color:var(--white)}
+.hero-name .outline{-webkit-text-stroke:1px var(--neon);color:transparent;text-shadow:0 0 40px rgba(0,245,212,.2)}
+.hero-sub{margin-top:2rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap}
+.hero-role{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.15em;color:var(--neon);text-transform:uppercase}
+.hero-sep{width:60px;height:1px;background:var(--border);flex-shrink:0}
+.hero-tagline{font-size:1rem;color:var(--muted);font-weight:300;max-width:400px;line-height:1.7}
+.hero-cta{margin-top:3.5rem;display:flex;gap:1.2rem;flex-wrap:wrap;align-items:center}
+.btn-neon{display:inline-flex;align-items:center;gap:.7rem;padding:.85rem 2.2rem;background:transparent;border:1px solid var(--neon);color:var(--neon);font-family:var(--font-mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;cursor:none;transition:background .3s,box-shadow .3s,transform .2s;position:relative;overflow:hidden}
+.btn-neon::before{content:'';position:absolute;inset:0;background:var(--neon);transform:translateX(-101%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:0}
+.btn-neon span{position:relative;z-index:1;transition:color .3s}
+.btn-neon:hover::before{transform:translateX(0)}
+.btn-neon:hover span{color:var(--c0)}
+.btn-neon:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,245,212,.3)}
+.btn-ghost2{display:inline-flex;align-items:center;gap:.7rem;padding:.85rem 2.2rem;border:1px solid rgba(255,255,255,.1);color:rgba(238,242,255,.5);font-family:var(--font-mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;cursor:none;transition:border-color .3s,color .3s,transform .2s}
+.btn-ghost2:hover{border-color:rgba(255,255,255,.3);color:var(--white);transform:translateY(-2px)}
+.hero-badges{position:absolute;right:5rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1rem;z-index:10}
+.hbadge{padding:.6rem 1.2rem;border:1px solid var(--border);background:rgba(8,13,26,.85);backdrop-filter:blur(10px);font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;color:rgba(238,242,255,.6);display:flex;align-items:center;gap:.7rem;transform:translateX(20px);opacity:0;animation:slidein .6s forwards}
+.hbadge:nth-child(1){animation-delay:.8s}.hbadge:nth-child(2){animation-delay:1s}.hbadge:nth-child(3){animation-delay:1.2s}.hbadge:nth-child(4){animation-delay:1.4s}
+@keyframes slidein{to{transform:translateX(0);opacity:1}}
+.hbadge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.hero-photo {
+  position: absolute;
+  right: 5rem;
+  bottom: 4rem;
+  width: 220px;
+  height: 280px;
+  z-index: 10;
+}
+
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  border: 1px solid rgba(0,245,212,0.3);
+  filter: grayscale(20%) contrast(1.05);
+  transition: filter 0.3s;
+}
+
+.hero-photo img:hover {
+  filter: grayscale(0%) contrast(1.1);
+}
+
+.hero-photo::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid rgba(0,245,212,0.15);
+  z-index: -1;
+}
+
+.hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5,8,16,0.6) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+@media(max-width:900px) {
+  .hero-photo { display: none; }
+}
+.hero-scroll{position:absolute;bottom:3rem;right:5rem;display:flex;flex-direction:column;align-items:center;gap:.8rem;z-index:10}
+.hero-scroll span{font-family:var(--font-mono);font-size:.55rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;writing-mode:vertical-rl}
+.scroll-bar{width:1px;height:60px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+.scroll-bar::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:50%;background:var(--neon);animation:scrolldown 1.8s ease-in-out infinite}
+@keyframes scrolldown{0%{top:-50%}100%{top:150%}}
+
+/* SECTIONS */
+section{padding:7rem 5rem;position:relative;z-index:10}
+.eyebrow{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--neon);margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem}
+.eyebrow::before{content:'//';color:rgba(0,245,212,.4)}
+.s-title{font-family:var(--font-head);font-size:clamp(3rem,6vw,6rem);line-height:.95;color:var(--white);margin-bottom:1rem}
+.s-title .hl{-webkit-text-stroke:1px var(--neon2);color:transparent}
+
+/* ABOUT */
+.about{background:var(--c1)}
+.about-layout{display:grid;grid-template-columns:1fr 1.1fr;gap:6rem;align-items:start;margin-top:4rem}
+.about-bio p{font-size:.95rem;line-height:1.9;color:rgba(238,242,255,.6);margin-bottom:1.4rem}
+.about-bio strong{color:var(--neon);font-weight:600}
+.skills-head{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin:2.5rem 0 1rem}
+.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+.skill-item{padding:.7rem 1rem;border:1px solid var(--border);background:var(--neon-dim);display:flex;align-items:center;gap:.75rem;font-size:.78rem;color:rgba(238,242,255,.75);transition:border-color .3s,transform .2s;cursor:default}
+.skill-item:hover{border-color:var(--neon);transform:translateX(4px)}
+.skill-item::before{content:'>';font-family:var(--font-mono);font-size:.65rem;color:var(--neon);flex-shrink:0}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:2rem}
+.stat-box{background:var(--c1);padding:1.5rem 1rem;text-align:center}
+.stat-num{font-family:var(--font-head);font-size:2.8rem;color:var(--neon);line-height:1;display:block;text-shadow:0 0 20px rgba(0,245,212,.3)}
+.stat-lbl{font-family:var(--font-mono);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-top:.3rem}
+.info-block{margin-bottom:2rem}
+.info-block-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--neon);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.edu-card{padding:1.5rem;border:1px solid var(--border);background:var(--neon-dim);position:relative;overflow:hidden}
+.edu-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--neon)}
+.edu-degree{font-size:.92rem;font-weight:600;color:var(--white);margin-bottom:.25rem}
+.edu-school{font-family:var(--font-mono);font-size:.7rem;color:var(--neon);margin-bottom:.5rem}
+.edu-year{font-family:var(--font-mono);font-size:.6rem;color:var(--muted)}
+.focus-list{display:flex;flex-direction:column;gap:.5rem}
+.focus-list .skill-item{font-size:.82rem}
+
+/* SKILLS */
+.skills-sec{background:var(--c0)}
+.skills-masonry{margin-top:4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.skill-card{padding:2rem;border:1px solid var(--border);background:var(--c1);position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.skill-card:hover{border-color:rgba(0,245,212,.4);transform:translateY(-4px)}
+.skill-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(0,245,212,.04),transparent 60%);pointer-events:none}
+.skill-card-icon{font-size:1.6rem;margin-bottom:1.2rem;display:block}
+.skill-card-name{font-family:var(--font-head);font-size:1.5rem;color:var(--white);letter-spacing:.05em;margin-bottom:.8rem}
+.skill-card-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.2rem}
+.stag{padding:.3rem .7rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em}
+.c-neon .stag{background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);color:rgba(0,245,212,.75)}
+.c-purple .stag{background:rgba(123,47,255,.1);border:1px solid rgba(123,47,255,.25);color:rgba(180,140,255,.8)}
+.c-pink .stag{background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);color:rgba(255,100,150,.8)}
+.c-blue .stag{background:rgba(0,180,255,.08);border:1px solid rgba(0,180,255,.2);color:rgba(80,200,255,.8)}
+.c-amber .stag{background:rgba(255,190,0,.07);border:1px solid rgba(255,190,0,.2);color:rgba(255,200,80,.8)}
+.c-green .stag{background:rgba(60,220,100,.07);border:1px solid rgba(60,220,100,.2);color:rgba(80,220,120,.8)}
+.skill-bar-row{margin-top:.5rem}
+.skill-bar-label{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.58rem;color:var(--muted);margin-bottom:.4rem}
+.skill-bar-track{height:2px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+.skill-bar-fill{height:100%;transform:scaleX(0);transform-origin:left;transition:transform 1.3s cubic-bezier(.4,0,.2,1)}
+.c-neon .skill-bar-fill{background:var(--neon)}
+.c-purple .skill-bar-fill{background:var(--neon2)}
+.c-pink .skill-bar-fill{background:var(--neon3)}
+.c-blue .skill-bar-fill{background:#00c8ff}
+.c-amber .skill-bar-fill{background:#ffc000}
+.c-green .skill-bar-fill{background:#3cdc64}
+
+/* CONTACT */
+.contact-sec{background:var(--c1)}
+.contact-inner{display:grid;grid-template-columns:1fr 1fr;gap:6rem;margin-top:5rem;align-items:start}
+.big-email{font-family:var(--font-head);font-size:clamp(1.5rem,2.8vw,2.6rem);color:var(--neon);text-decoration:none;display:block;margin-top:2rem;letter-spacing:.05em;transition:text-shadow .3s;cursor:none}
+.big-email:hover{text-shadow:0 0 30px rgba(0,245,212,.5)}
+.contact-left p{font-size:.9rem;line-height:1.8;color:rgba(238,242,255,.5);margin-top:1.5rem;max-width:360px}
+.socials{margin-top:2.5rem;display:flex;flex-direction:column;gap:.7rem}
+.social-row{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border:1px solid var(--border);background:rgba(0,245,212,.03);text-decoration:none;color:rgba(238,242,255,.55);font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;transition:border-color .3s,color .3s,transform .2s;cursor:none}
+.social-row:hover{border-color:var(--neon);color:var(--neon);transform:translateX(6px)}
+.social-row::after{content:'↗';margin-left:auto;opacity:.4;transition:opacity .3s}
+.social-row:hover::after{opacity:1}
+.cf{display:flex;flex-direction:column;gap:1rem}
+.cf label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.cf input,.cf textarea{background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--white);padding:.9rem 1.1rem;font-family:var(--font-body);font-size:.88rem;outline:none;resize:none;transition:border-color .3s;cursor:none}
+.cf input:focus,.cf textarea:focus{border-color:rgba(0,245,212,.4)}
+.cf input::placeholder,.cf textarea::placeholder{color:rgba(90,106,138,.4)}
+.cf-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* FOOTER */
+footer{background:var(--c0);border-top:1px solid var(--border);padding:2rem 5rem;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10}
+.f-logo{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase}
+.f-copy{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;color:var(--muted)}
+.f-status{display:flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.58rem;color:var(--neon)}
+
+/* REVEAL ANIMATIONS */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .75s cubic-bezier(.4,0,.2,1),transform .75s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-36px);transition:opacity .75s ease,transform .75s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(36px);transition:opacity .75s ease,transform .75s ease}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+/* MOBILE */
+@media(max-width:900px){
+  nav{padding:1.2rem 2rem}nav::after{left:2rem;right:2rem}
+  .nav-links{display:none}
+  .hero{padding:8rem 2rem 5rem}
+  .hero-badges,.hero-scroll{display:none}
+  section{padding:5rem 2rem}
+  .about-layout,.contact-inner{grid-template-columns:1fr;gap:3rem}
+  .skills-masonry{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:1rem;text-align:center;padding:2rem}
+  .cf-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+<div id="cur"></div>
+<div id="cur2"></div>
+
+<nav>
+  <a href="#" class="nav-logo"><span class="nav-dot"></span>DAI.SYS</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skill</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-chip"><span class="nav-dot"></span>Available for collaboration &mdash; 2026</div>
+  <h1 class="hero-name">
+    DZAKI<br>ARYO<br><span class="outline">AL-IKRAM</span>
+  </h1>
+  <div class="hero-sub">
+    <span class="hero-role">Computer System</span>
+    <div class="hero-sep"></div>
+    <span class="hero-tagline">Building intelligent systems from the deepest layers &mdash; hardware to software.</span>
+  </div>
+  <div class="hero-cta">
+    <a href="#about" class="btn-neon"><span>Get to Know Me</span></a>
+    <a href="#contact" class="btn-ghost2">Contact &rarr;</a>
+  </div>
+  <div class="hero-photo">
+  <img src="assets/dzaki.PNG" alt="Dzaki Aryo Al-Ikram">
+  </div>
+  <div class="hero-badges">
+    <div class="hbadge"><span class="hbadge-dot" style="background:#00f5d4;box-shadow:0 0 6px #00f5d4"></span>Programming</div>
+    <div class="hbadge"><span class="hbadge-dot" style="background:#7b2fff;box-shadow:0 0 6px #7b2fff"></span>Embedded Systems</div>
+    <div class="hbadge"><span class="hbadge-dot" style="background:#ff2d78;box-shadow:0 0 6px #ff2d78"></span>Linux &amp; Networking</div>
+    <div class="hbadge"><span class="hbadge-dot" style="background:#00c8ff;box-shadow:0 0 6px #00c8ff"></span>IoT &amp; Mikrokontroler</div>
+  </div>
+  
+  <div class="hero-scroll"><div class="scroll-bar"></div><span>scroll</span></div>
+</section>
+
+<section class="about" id="about">
+  <div class="eyebrow">About me</div>
+  <h2 class="s-title">WHO AM <span class="hl">I</span></h2>
+  <div class="about-layout">
+    <div class="about-bio reveal reveal-left">
+      <p>Hello There! I'm <strong>Dzaki Aryo Al-Ikram</strong>, a <strong>Computer Systems</strong> student passionate about understanding how technology works from its most fundamental level.</p>
+      <p>I'm interested in <strong>embedded systems, computer networks, low-level programming,</strong> and how hardware and software interact to create efficient and reliable systems.</p>
+      <p>Besides studying on campus, I actively explore and experiment &mdash; from programming microcontrollers to configuring local area networks directly.</p>
+      <div class="skills-head">Technical Skills</div>
+      <div class="skill-grid">
+        <div class="skill-item">Python</div>
+        <div class="skill-item">Embedded Systems</div>
+        <div class="skill-item">Arduino / ESP32</div>
+        <div class="skill-item">Linux (Ubuntu/Debian)</div>
+        <div class="skill-item">Computer Network</div>
+        <div class="skill-item">Computer Architecture</div>
+        <div class="skill-item">Operating system</div>
+        <div class="skill-item">IoT Basics</div>
+        <div class="skill-item">Git &amp; Version Control</div>
+      </div>
+    </div>
+    <div class="reveal reveal-right">
+      <div class="stat-row">
+        <div class="stat-box"><span class="stat-num">3+</span><span class="stat-lbl">Years of Study</span></div>
+        <div class="stat-box"><span class="stat-num">100+</span><span class="stat-lbl">Subject</span></div>
+        <div class="stat-box"><span class="stat-num">&infin;</span><span class="stat-lbl">Curiosity</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-label">Education</div>
+        <div class="edu-card">
+          <div class="edu-degree">S1 Faculty of Computer Science / Computer System</div>
+          <div class="edu-school">Sriwijaya University &mdash; Palembang, Indonesia</div>
+          <div class="edu-year">2022 &mdash; Now</div>
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-label">Focus of Study</div>
+        <div class="focus-list">
+          <div class="skill-item">Architecture &amp; Computer Organization</div>
+          <div class="skill-item">System Programming &amp; Low-Level</div>
+          <div class="skill-item">Embedded &amp; Real-Time Systems</div>
+          <div class="skill-item">Data Communication &amp; Network</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="skills-sec" id="skills">
+  <div class="eyebrow">Competence</div>
+  <h2 class="s-title">AREA OF <span class="hl">SKILLS</span></h2>
+  <div class="skills-masonry">
+    <div class="skill-card c-neon reveal d1">
+      <span class="skill-card-icon">⚙️</span>
+      <div class="skill-card-name">HARDWARE &amp; EMBEDDED</div>
+      <div class="skill-card-tags"><span class="stag">Arduino</span><span class="stag">ESP32</span><span class="stag">Raspberry Pi</span><span class="stag">GPIO</span><span class="stag">PWM</span><span class="stag">UART/I2C/SPI</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>75%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".75"></div></div></div>
+    </div>
+    <div class="skill-card c-purple reveal d2">
+      <span class="skill-card-icon">💻</span>
+      <div class="skill-card-name">PROGRAMMING</div>
+      <div class="skill-card-tags"><span class="stag">C</span><span class="stag">C++</span><span class="stag">Python</span><span class="stag">Assembly x86</span><span class="stag">Bash Scripting</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>80%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".8"></div></div></div>
+    </div>
+    <div class="skill-card c-pink reveal d3">
+      <span class="skill-card-icon">🌐</span>
+      <div class="skill-card-name">NETWORK &amp; OS</div>
+      <div class="skill-card-tags"><span class="stag">TCP/IP</span><span class="stag">Linux CLI</span><span class="stag">Routing Dasar</span><span class="stag">DNS</span><span class="stag">Subnetting</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>70%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".7"></div></div></div>
+    </div>
+    <div class="skill-card c-blue reveal d1">
+      <span class="skill-card-icon">🔌</span>
+      <div class="skill-card-name">IOT &amp; SENSOR</div>
+      <div class="skill-card-tags"><span class="stag">MQTT</span><span class="stag">DHT / PIR</span><span class="stag">Aktuator</span><span class="stag">Wi-Fi Module</span><span class="stag">ThingSpeak</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>68%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".68"></div></div></div>
+    </div>
+    <div class="skill-card c-amber reveal d2">
+      <span class="skill-card-icon">🗄️</span>
+      <div class="skill-card-name">DATA STRUCTURE &amp; ALGO</div>
+      <div class="skill-card-tags"><span class="stag">Array &amp; Linked List</span><span class="stag">Stack / Queue</span><span class="stag">Sorting</span><span class="stag">Graph Dasar</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>72%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".72"></div></div></div>
+    </div>
+    <div class="skill-card c-green reveal d3">
+      <span class="skill-card-icon">🛠️</span>
+      <div class="skill-card-name">TOOLS &amp; WORKFLOW</div>
+      <div class="skill-card-tags"><span class="stag">Git</span><span class="stag">VS Code</span><span class="stag">Packet Tracer</span><span class="stag">Logisim</span><span class="stag">Multisim</span></div>
+      <div class="skill-bar-row"><div class="skill-bar-label"><span>Mastery</span><span>78%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-w=".78"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-sec" id="contact">
+  <div class="eyebrow">Contact</div>
+  <h2 class="s-title">LET'S <span class="hl">CONNECT</span></h2>
+  <div class="contact-inner">
+    <div class="contact-left reveal reveal-left">
+      <a href="mailto:dzaki.aryo@email.com" class="big-email">dzakiaryo06@gmail.com</a>
+      <p>Open for discussion, project collaboration, knowledge sharing, or just chatting about technology and computer systems.</p>
+      <div class="socials">
+        <a href="https://www.linkedin.com/in/dzakiaryo?utm_source=share_via&utm_content=profile&utm_medium=member_android" class="social-row">LinkedIn</a>
+        <a href="https://github.com/Dzaki12345" class="social-row">GitHub</a>
+        <a href="https://www.instagram.com/dzakiaryoo?igsh=MTdiM2phZ3A4NXFucw==" class="social-row">Instagram</a>
+      </div>
+    </div>
+    <div class="reveal reveal-right d2">
+      <div class="cf">
+        <div class="cf-row">
+          <div style="display:flex;flex-direction:column;gap:.5rem"><label>Name</label><input type="text" placeholder="Your Name"></div>
+          <div style="display:flex;flex-direction:column;gap:.5rem"><label>Email</label><input type="email" placeholder="email@anda.com"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem"><label>Topic</label><input type="text" placeholder="What would you like to discuss?"></div>
+        <div style="display:flex;flex-direction:column;gap:.5rem"><label>Message</label><textarea rows="5" placeholder="Write your message..."></textarea></div>
+        <button class="btn-neon" style="align-self:flex-start;border:1px solid var(--neon);background:transparent;cursor:none"><span>Send Message &rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">Dzaki Aryo Al-Ikram</div>
+  <div class="f-copy">&copy; 2025 &mdash; Palembang, Indonesia</div>
+  <div class="f-status"><span class="nav-dot"></span>Available</div>
+</footer>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cur'),cur2=document.getElementById('cur2');
+let mx=0,my=0,fx=0,fy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function tick(){fx+=(mx-fx)*.1;fy+=(my-fy)*.1;cur2.style.left=fx+'px';cur2.style.top=fy+'px';requestAnimationFrame(tick);})();
+document.querySelectorAll('a,button,input,textarea').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';cur2.style.width='52px';cur2.style.height='52px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';cur2.style.width='36px';cur2.style.height='36px';});
+});
+
+// ABSTRACT CANVAS
+const canvas=document.getElementById('bg-canvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+const particles=[];
+for(let i=0;i<130;i++){
+  particles.push({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,
+    r:Math.random()*1.4+.4,
+    hue:Math.random()<.5?170+(Math.random()*20-10):270+(Math.random()*20-10),
+    a:Math.random()*.5+.15,life:0,maxLife:300+Math.random()*500
+  });
+}
+
+const shapes=[];
+for(let i=0;i<16;i++){
+  shapes.push({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,
+    size:Math.random()*90+25,rot:Math.random()*Math.PI*2,
+    rotV:(Math.random()-.5)*.002,
+    sides:Math.floor(Math.random()*4)+3,
+    hue:[170,270,330,200][Math.floor(Math.random()*4)],
+    alpha:Math.random()*.05+.015
+  });
+}
+
+// Orbs — large soft glowing blobs
+const orbs=[
+  {x:W*.15,y:H*.3,r:250,hue:170,a:.06,vx:.08,vy:.04},
+  {x:W*.8,y:H*.6,r:300,hue:270,a:.05,vx:-.06,vy:.07},
+  {x:W*.5,y:H*.85,r:200,hue:330,a:.04,vx:.05,vy:-.05},
+];
+
+function drawFrame(){
+  ctx.clearRect(0,0,W,H);
+  // orbs
+  orbs.forEach(o=>{
+    o.x+=o.vx;o.y+=o.vy;
+    if(o.x<-o.r||o.x>W+o.r)o.vx*=-1;
+    if(o.y<-o.r||o.y>H+o.r)o.vy*=-1;
+    const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,`hsla(${o.hue},100%,60%,${o.a})`);
+    g.addColorStop(1,`hsla(${o.hue},100%,60%,0)`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();
+  });
+  // shapes
+  shapes.forEach(s=>{
+    s.x+=s.vx;s.y+=s.vy;s.rot+=s.rotV;
+    if(s.x<-200)s.x=W+200;if(s.x>W+200)s.x=-200;
+    if(s.y<-200)s.y=H+200;if(s.y>H+200)s.y=-200;
+    ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);
+    ctx.beginPath();
+    for(let i=0;i<s.sides;i++){const a=(i/s.sides)*Math.PI*2-Math.PI/2;i===0?ctx.moveTo(Math.cos(a)*s.size,Math.sin(a)*s.size):ctx.lineTo(Math.cos(a)*s.size,Math.sin(a)*s.size);}
+    ctx.closePath();
+    ctx.strokeStyle=`hsla(${s.hue},100%,65%,${s.alpha*2.5})`;ctx.lineWidth=.6;ctx.stroke();
+    ctx.fillStyle=`hsla(${s.hue},100%,50%,${s.alpha})`;ctx.fill();
+    ctx.restore();
+  });
+  // particles + connections
+  for(let i=0;i<particles.length;i++){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.life++;
+    if(p.x<0||p.x>W||p.y<0||p.y>H||p.life>p.maxLife){
+      p.x=Math.random()*W;p.y=Math.random()*H;p.life=0;p.maxLife=300+Math.random()*500;
+    }
+    const fade=p.life<40?p.life/40:p.life>p.maxLife-40?(p.maxLife-p.life)/40:1;
+    for(let j=i+1;j<particles.length;j++){
+      const q=particles[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<110){
+        ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+        ctx.strokeStyle=`rgba(0,245,212,${(1-d/110)*.07})`;ctx.lineWidth=.5;ctx.stroke();
+      }
+    }
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`hsla(${p.hue},100%,65%,${p.a*fade})`;ctx.fill();
+  }
+  requestAnimationFrame(drawFrame);
+}
+drawFrame();
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.14});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>obs.observe(el));
+
+// SKILL BARS
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.skill-bar-fill').forEach(f=>{
+        f.style.transform=`scaleX(${f.dataset.w})`;
+      });
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.skill-card').forEach(c=>barObs.observe(c));
+
+// NAV ACTIVE
+const secs=document.querySelectorAll('section[id]'),navAs=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let active='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-260)active=s.id;});
+  navAs.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+active));
+},{passive:true});
+</script>
+</body>
+</html>
